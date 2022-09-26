@@ -2,26 +2,31 @@
 #define LOGGER
 
 #include <string>
+#include <vector>
 #include <chrono>
 #include <ctime>
-#include <Windows.h>
 #include <iostream>
+
+enum LogType {
+	LOG_INFO,
+	LOG_WARNING,
+	LOG_ERROR
+};
+
+struct LogEntry {
+	LogType type;
+	std::string message;	
+};
 
 class Logger
 {
 
 public:
+	static std::vector<LogEntry> messages;
 	static void Log(const std::string& message);
 	static void Err(const std::string& message);
-	static std::string GetMonth(int monthInNumber);
-	static void PrintCurrentDate();
-	static void PrintCurrentTime();
+
 
 };
 
 #endif // !LOGGER_H
-
-
-
-
-

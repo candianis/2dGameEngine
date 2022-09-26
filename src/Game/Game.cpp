@@ -1,10 +1,11 @@
-#include "Headers/Game.h"
+#include "Game.h"
 
 
 Game::Game()
 {
 	isRunning = false;
 	Logger::Log("Game constructor called");
+	Logger::Err("Error check");
 }
 
 Game::~Game()
