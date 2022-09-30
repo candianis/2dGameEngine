@@ -3,9 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <chrono>
-#include <ctime>
-#include <iostream>
+
 
 enum LogType {
 	LOG_INFO,

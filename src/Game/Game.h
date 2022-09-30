@@ -1,11 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "../Logger/Logger.h"
 #include <SDL.h>
-#include <SDL_image.h>
-#include <glm/glm.hpp>
-#include <iostream>
 
 const int FPS = 60;
 const int MILLISECS_PER_FRAME = 1000 / FPS;
