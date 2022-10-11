@@ -1,6 +1,8 @@
 #include "Game.h"
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/RigidbodyComponent.h"
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -8,12 +10,14 @@
 Game::Game()
 {
 	isRunning = false;
+	registry = std::make_unique<Registry>();
 	Logger::Log("Game constructor called");
 	Logger::Err("Error check");
 }
 
 Game::~Game()
 {
+
 	Logger::Log("Game destructor called");
 }
 
@@ -66,11 +70,16 @@ void Game::Run()
 }
 
 void Game::Setup() {
-	//Initialize Game Objects
-	//Entity tank = registry.CreateEntity();
-	//tank.AddComponent<TransformComponent>();
-	//tank.AddComponent<BoxColliderComponent>();
-	//tank.AddComponent<SpriteComponent>("./assets/images/tank.png");
+	Entity tank = registry->CreateEntity();
+	Entity truck = registry->CreateEntity();
+
+	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+	tank.AddComponent<RigidBodyComponent>(glm::vec2(1.0));
+
+	truck.AddComponent<TransformComponent>(glm::vec2(5.0, 15.0), glm::vec2(1.0, 1.0), 0.0);
+	truck.RemoveComponent<TransformComponent>();
+
+	
 }
 
 void Game::ProcessInput()
