@@ -34,6 +34,7 @@ public:
 	template <typename TComponent> TComponent& GetComponent() const;
 
 	class Registry* registry;
+	
 
 };
 
@@ -130,7 +131,7 @@ private:
 
 	//Set of entities flagged to be added or removed in the next frame
 	std::set<Entity> entitiesToBeAdded;
-	std::set<Entity> entitiesToBeRenoved;
+	std::set<Entity> entitiesToBeRemoved;
 
 public:
 	Registry() { 
@@ -229,8 +230,8 @@ TComponent& Registry::GetComponent(Entity entity) const {
 //System templates
 template <typename TSystem, typename ...TArgs> 
 void Registry::AddSystem(TArgs&& ...args) {
-	std::shared_ptr<TSystem> newSystem =  std::make_shared<TSystem>(std::forward<TArgs>(args)...);
-	systems.insert(std::make_pair(std::type_index(typeid(TSystem()), newSystem)));
+	std::shared_ptr<TSystem> newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
+	systems.insert(std::make_pair(std::type_index(typeid(TSystem)), newSystem));
 }
 
 template <typename TSystem> 
