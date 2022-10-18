@@ -24,11 +24,14 @@ public:
 	~Game();
 	void Initialize();
 	void Run();
+	void LoadLevel(int levelId);
 	void Setup();
 	void ProcessInput();
 	void Update();
 	void Render();
 	void Destroy();
+
+	void AddTile(int mapId, int x, int y);
 
 	int windowWidth;
 	int windowHeight;

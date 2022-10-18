@@ -9,6 +9,8 @@
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <fstream>
+#include <iostream>
 
 Game::Game()
 {
@@ -73,15 +75,68 @@ void Game::Run()
 	}
 }
 
-void Game::Setup() {
+void Game::LoadLevel(int levelId) {
+	//Loadlevel will create entities and load levels
+
 	registry->AddSystem<MovementSystem>();
 	registry->AddSystem<RenderSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
 
+	//Load the tilemap
+	assetStore->AddTexture(renderer, "jungle-map", "./assets/tilemaps/jungle.png");
+	std::vector<std::string> data;
+	std::ifstream jungle_map ("./assets/tilemaps/jungle.map");
+
+	float posX(0);
+	float posY(0);
+
+	if (jungle_map.is_open())
+	{
+		while (jungle_map.good()) {
+			std::string substr;
+			std::getline(jungle_map, substr, ',');
+			data.push_back(substr);
+		}
+		std::cout << data.size() << std::endl;
+		for (int i = 0; i <= data.size() - 1; ++i) {
+			std::vector<Entity> tiles;
+			Entity temp = registry->CreateEntity();
+			tiles.push_back(temp);
+
+			if (posX > 24) {
+				posX = 0;
+				++posY;
+			}
+			
+			temp.AddComponent<TransformComponent>(glm::vec2(32.0 * posX, 32.0 * posY), glm::vec2(1.0, 1.0), 0.0);
+			std::cout << "(" << 32 * posX << ", " << 32 * posY << ")";
+			++posX;
+
+			int mapX = std::stoi(data[i]);
+			int mapY(0);
+			
+			if (mapX >= 10 && mapX < 20) {
+				mapX -= 10;
+				mapY = 1;
+			}
+			else if (mapX >= 20) {
+				mapX -= 20;
+				mapY = 2;
+			}
+
+			temp.AddComponent<SpriteComponent>("jungle-map", 32, 32, mapX * 32, mapY * 32);
+			
+		}
+	}
+	jungle_map.close();
+
+	std::cout << data[0];
+
+	//Deal with Entities
 	Entity tank = registry->CreateEntity();
-	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(3.0, 3.0), 0.0);
+	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
 	tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
 	tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
 
@@ -89,6 +144,11 @@ void Game::Setup() {
 	truck.AddComponent<TransformComponent>(glm::vec2(50.0, 105.0), glm::vec2(1.0, 1.0), 0.0);
 	truck.AddComponent<RigidBodyComponent>(glm::vec2(5.0, 2.5));
 	truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
+
+}
+
+void Game::Setup() {
+	LoadLevel(1);
 }
 
 void Game::ProcessInput()
@@ -147,4 +207,9 @@ void Game::Destroy()
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
+}
+
+void Game::AddTile(int mapId, int x, int y)
+{
+
 }
