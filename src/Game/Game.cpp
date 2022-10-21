@@ -4,8 +4,10 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/AnimationComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Systems/AnimationSystem.h"
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -80,11 +82,17 @@ void Game::LoadLevel(int levelId) {
 
 	registry->AddSystem<MovementSystem>();
 	registry->AddSystem<RenderSystem>();
+	registry->AddSystem<AnimationSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
+	assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper.png");
+	assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
 
 	//Load the tilemap
+	const int tileSize = 32;
+	const double tileScale = 2.0;
+
 	assetStore->AddTexture(renderer, "jungle-map", "./assets/tilemaps/jungle.png");
 	std::vector<std::string> data;
 	std::ifstream jungle_map ("./assets/tilemaps/jungle.map");
@@ -101,16 +109,14 @@ void Game::LoadLevel(int levelId) {
 		}
 		std::cout << data.size() << std::endl;
 		for (int i = 0; i <= data.size() - 1; ++i) {
-			std::vector<Entity> tiles;
 			Entity temp = registry->CreateEntity();
-			tiles.push_back(temp);
 
 			if (posX > 24) {
 				posX = 0;
 				++posY;
 			}
 			
-			temp.AddComponent<TransformComponent>(glm::vec2(32.0 * posX, 32.0 * posY), glm::vec2(1.0, 1.0), 0.0);
+			temp.AddComponent<TransformComponent>(glm::vec2(posX * (tileSize * tileScale), posY * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
 			std::cout << "(" << 32 * posX << ", " << 32 * posY << ")";
 			++posX;
 
@@ -126,7 +132,7 @@ void Game::LoadLevel(int levelId) {
 				mapY = 2;
 			}
 
-			temp.AddComponent<SpriteComponent>("jungle-map", 32, 32, mapX * 32, mapY * 32);
+			temp.AddComponent<SpriteComponent>("jungle-map", tileSize, tileSize, render_layers::LAYER_TILEMAP, mapX * tileSize, mapY * tileSize);
 			
 		}
 	}
@@ -135,15 +141,26 @@ void Game::LoadLevel(int levelId) {
 	std::cout << data[0];
 
 	//Deal with Entities
+	Entity chopper = registry->CreateEntity();
+	chopper.AddComponent<TransformComponent>(glm::vec2(100.0, 80.0), glm::vec2(1.0, 1.0), 0.0);
+	chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+	chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, render_layers::LAYER_PLAYER);
+	chopper.AddComponent<AnimationComponent>(2, 15);
+
+	Entity radar = registry->CreateEntity();
+	radar.AddComponent<TransformComponent>(glm::vec2(1125.0, 16.0), glm::vec2(1.0, 1.0), 0.0);
+	radar.AddComponent<SpriteComponent>("radar-image", 64, 64, render_layers::LAYER_GUI);
+	radar.AddComponent<AnimationComponent>(8, 7);
+
 	Entity tank = registry->CreateEntity();
 	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
 	tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
-	tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
+	tank.AddComponent<SpriteComponent>("tank-image", 32, 32, render_layers::LAYER_ENEMIES);
 
 	Entity truck = registry->CreateEntity();
-	truck.AddComponent<TransformComponent>(glm::vec2(50.0, 105.0), glm::vec2(1.0, 1.0), 0.0);
-	truck.AddComponent<RigidBodyComponent>(glm::vec2(5.0, 2.5));
-	truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
+	truck.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+	truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
+	truck.AddComponent<SpriteComponent>("truck-image", 32, 32, render_layers::LAYER_ENEMIES);
 
 }
 
@@ -188,6 +205,7 @@ void Game::Update()
 	
 	//Update all Systems that do not need to be rendered
 	registry->GetSystem<MovementSystem>().Update(deltaTime);
+	registry->GetSystem<AnimationSystem>().Update();
 	
 }
 
@@ -209,7 +227,3 @@ void Game::Destroy()
 	SDL_Quit();
 }
 
-void Game::AddTile(int mapId, int x, int y)
-{
-
-}

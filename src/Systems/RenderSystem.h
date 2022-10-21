@@ -6,6 +6,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/SpriteComponent.h"
 #include <SDL.h>
+#include <algorithm>
 
 class RenderSystem : public System {
 public:
@@ -15,7 +16,13 @@ public:
 	}
 
 	void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore) {
-		for (auto entity : GetSystemEntities()) {
+		std::vector<Entity> entitiesList = GetSystemEntities();
+
+		std::sort(entitiesList.begin(), entitiesList.end(), [](const auto& entity1, const auto& entity2) {
+			return entity1.GetComponent<SpriteComponent>().GetLayer() < entity2.GetComponent<SpriteComponent>().GetLayer();
+			});
+
+		for (auto entity : entitiesList) {
 			const auto transform = entity.GetComponent<TransformComponent>();
 			const auto sprite = entity.GetComponent<SpriteComponent>();
 

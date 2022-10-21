@@ -31,8 +31,6 @@ public:
 	void Render();
 	void Destroy();
 
-	void AddTile(int mapId, int x, int y);
-
 	int windowWidth;
 	int windowHeight;
 };
