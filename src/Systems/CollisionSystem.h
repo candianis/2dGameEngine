@@ -44,9 +44,10 @@ public:
 
 				if (collisionHappened) {
 					Logger::Log("Entity with id " + std::to_string(a.GetId()) + " collided with Entity with id " + std::to_string(b.GetId()));
+					
 				}
 			}
-			if (showingColliders) {
+			/*if (showingColliders) {
 				SDL_Rect colliderRect = {
 					static_cast<int>(aTransform.position.x + (aCollider.offset.x * aTransform.scale.x)),
 					static_cast<int>(aTransform.position.y + (aCollider.offset.y * aTransform.scale.y)),
@@ -54,14 +55,12 @@ public:
 					static_cast<int>(aCollider.height * aTransform.scale.y)
 				};
 
-
-				Logger::Log("Rendering colliders for entity id " + std::to_string(a.GetId()));
 				if (collisionHappened)
 					SDL_SetRenderDrawColor(renderer, 236, 26, 26, 255);
 				else
 					SDL_SetRenderDrawColor(renderer, 14, 232, 58, 255);
 				SDL_RenderDrawRect(renderer, &colliderRect);
-			}
+			}*/
 		}
 	}
 

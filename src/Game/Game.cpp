@@ -21,6 +21,7 @@ Game::Game()
 	isRunning = false;
 	registry = std::make_unique<Registry>();
 	assetStore = std::make_unique<AssetStore>();
+
 	Logger::Log("Game constructor called");
 	Logger::Err("Error check");
 
@@ -169,6 +170,11 @@ void Game::LoadLevel(int levelId) {
 	truck.AddComponent<SpriteComponent>("truck-image", 32, 32, render_layers::LAYER_ENEMIES);
 	truck.AddComponent<BoxColliderComponent>(32, 32);
 
+	Entity test1 = registry->CreateEntity();
+	test1.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+	test1.Kill();
+
+	Entity test2 = registry->CreateEntity();
 }
 
 void Game::Setup() {

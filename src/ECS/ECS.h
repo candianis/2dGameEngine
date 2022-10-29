@@ -8,6 +8,7 @@
 #include <typeindex>
 #include <set>
 #include <memory>
+#include <deque>
 
 const unsigned int MAX_COMPONENTS = 32;
 
@@ -21,6 +22,7 @@ public:
 	Entity(int id) : id(id){};
 	Entity(const Entity& entity) = default;
 	int GetId() const;
+	void Kill();
 
 	Entity& operator =(const Entity& other) = default;
 	bool operator ==(const Entity& other) const { return id == other.id; }
@@ -131,7 +133,10 @@ private:
 
 	//Set of entities flagged to be added or removed in the next frame
 	std::set<Entity> entitiesToBeAdded;
-	std::set<Entity> entitiesToBeRemoved;
+	std::set<Entity> entitiesToBeKilled;
+
+	//List of free entity ids that were previously removed
+	std::deque<int> freeIds;
 
 public:
 	Registry() { 
@@ -145,6 +150,7 @@ public:
 	void Update();
 	
 	Entity CreateEntity();
+	void KillEntity(Entity entity);
 
 	//Component management
 	template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
@@ -160,6 +166,9 @@ public:
 
 	//Checks the component signature of an entity and adds the entity to the systems that are interested in it
 	void AddEntityToSystem(Entity entity);
+
+	//Remove entities from the systems
+	void RemoveEntityFromSystems(Entity entity);
 };
 
 template <typename TComponent>
