@@ -6,22 +6,33 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../Components/KeyboardControlledComponent.h"
+#include "../Components/CameraFollowComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
+#include "../Systems/DamageSystem.h"
+#include "../Systems/InputSystem.h"
+#include "../Systems/KeyboardControlSystem.h"
+#include "../Systems/CameraMovementSystem.h"
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <fstream>
 #include <iostream>
 
+int Game::windowHeight;
+int Game::windowWidth;
+int Game::mapWidth;
+int Game::mapHeight;
+
 Game::Game()
 {
 	isRunning = false;
 	registry = std::make_unique<Registry>();
 	assetStore = std::make_unique<AssetStore>();
-
+	eventBus = std::make_unique<EventBus>();
 	Logger::Log("Game constructor called");
 	Logger::Err("Error check");
 
@@ -67,6 +78,12 @@ void Game::Initialize()
 		return;
 	}
 
+	//Initialize the camera view with the entire screen area
+	camera.x = 0;
+	camera.y = 0;
+	camera.w = windowWidth;
+	camera.h = windowHeight;
+
 	//SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 	isRunning = true;
 }
@@ -88,62 +105,49 @@ void Game::LoadLevel(int levelId) {
 	registry->AddSystem<RenderSystem>();
 	registry->AddSystem<AnimationSystem>();
 	registry->AddSystem<CollisionSystem>();
+	registry->AddSystem<DamageSystem>();
+	registry->AddSystem<InputSystem>();
+	registry->AddSystem<KeyboardControlSystem>();
+	registry->AddSystem<CameraMovementSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
-	assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper.png");
+	assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png");
 	assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
+	assetStore->AddTexture(renderer, "jungle-map", "./assets/tilemaps/jungle.png");
 
 	//Load the tilemap
 	const int tileSize = 32;
 	const double tileScale = 2.0;
+	int mapNumCols = 25;
+	int mapNumRows = 20;
 
-	assetStore->AddTexture(renderer, "jungle-map", "./assets/tilemaps/jungle.png");
-	std::vector<std::string> data;
-	std::ifstream jungle_map ("./assets/tilemaps/jungle.map");
+	std::ifstream mapFile;
+	mapFile.open("./assets/tilemaps/jungle.map");
 
-	float posX(0);
-	float posY(0);
-
-	if (jungle_map.is_open())
+	if (mapFile.is_open())
 	{
-		while (jungle_map.good()) {
-			std::string substr;
-			std::getline(jungle_map, substr, ',');
-			data.push_back(substr);
-		}
-		std::cout << data.size() << std::endl;
-		for (int i = 0; i <= data.size() - 1; ++i) {
-			Entity temp = registry->CreateEntity();
+		if (!mapFile.good())
+			return;
 
-			if (posX > 24) {
-				posX = 0;
-				++posY;
-			}
-			
-			temp.AddComponent<TransformComponent>(glm::vec2(posX * (tileSize * tileScale), posY * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
-			std::cout << "(" << 32 * posX << ", " << 32 * posY << ")";
-			++posX;
+		for (int y = 0; y < mapNumRows; y++)
+			for (int x = 0; x < mapNumCols; x++) {
+				char ch;
+				mapFile.get(ch);
+				int srcRectY = std::atoi(&ch) * tileSize;
+				mapFile.get(ch);
+				int srcRectX = std::atoi(&ch) * tileSize;
+				mapFile.ignore();
 
-			int mapX = std::stoi(data[i]);
-			int mapY(0);
-			
-			if (mapX >= 10 && mapX < 20) {
-				mapX -= 10;
-				mapY = 1;
+				Entity temp = registry->CreateEntity();
+				temp.AddComponent<TransformComponent>(glm::vec2(x * (tileSize * tileScale), y * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
+				temp.AddComponent<SpriteComponent>("jungle-map", tileSize, tileSize, render_layers::LAYER_TILEMAP, srcRectX, srcRectY);
 			}
-			else if (mapX >= 20) {
-				mapX -= 20;
-				mapY = 2;
-			}
-
-			temp.AddComponent<SpriteComponent>("jungle-map", tileSize, tileSize, render_layers::LAYER_TILEMAP, mapX * tileSize, mapY * tileSize);
-			
-		}
 	}
-	jungle_map.close();
+	mapFile.close();
 
-	std::cout << data[0];
+	mapWidth = mapNumCols * tileSize * tileScale;
+	mapHeight = mapNumRows * tileSize * tileScale;
 
 	//Deal with Entities
 	Entity chopper = registry->CreateEntity();
@@ -152,6 +156,8 @@ void Game::LoadLevel(int levelId) {
 	chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, render_layers::LAYER_PLAYER);
 	chopper.AddComponent<AnimationComponent>(2, 15);
 	chopper.AddComponent<BoxColliderComponent>(32, 32);
+	chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80.0), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
+	chopper.AddComponent<CameraFollowComponent>();
 
 	Entity radar = registry->CreateEntity();
 	radar.AddComponent<TransformComponent>(glm::vec2(1125.0, 16.0), glm::vec2(1.0, 1.0), 0.0);
@@ -183,23 +189,7 @@ void Game::Setup() {
 
 void Game::ProcessInput()
 {
-	SDL_Event sdlEvent;
-	while (SDL_PollEvent(&sdlEvent)) {
-		switch (sdlEvent.type) {
-			case SDL_QUIT:
-				isRunning = false;
-				break;
-
-			case SDL_KEYDOWN:
-				if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
-					isRunning = false;
-				}
-				if (sdlEvent.key.keysym.sym == SDLK_d) {
-					registry->GetSystem<CollisionSystem>().ShowColliders();
-				}
-				break;
-		}
-	}
+	registry->GetSystem<InputSystem>().Update(eventBus, isRunning);
 }
 
 void Game::Update()
@@ -216,12 +206,24 @@ void Game::Update()
 	//Store the previous frame time
 	millisecsPreviousFrame = SDL_GetTicks();
 	
+	//Reset all event handlers for the current frame
+	eventBus->Reset();
+
+	//Perform the subscriptions of the events for all systems
+	//We have to subscribe to events before updating the systems
+	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+	registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+
 	//Update registry to create/destroy entities
 	registry->Update();
 	
 	//Update all Systems that do not need to be rendered
 	registry->GetSystem<MovementSystem>().Update(deltaTime);
 	registry->GetSystem<AnimationSystem>().Update();
+	registry->GetSystem<CollisionSystem>().Update(eventBus);
+	registry->GetSystem<DamageSystem>().Update();
+	registry->GetSystem<KeyboardControlSystem>().Update(eventBus);
+	registry->GetSystem<CameraMovementSystem>().Update(camera);
 	
 }
 
@@ -231,8 +233,7 @@ void Game::Render()
 	SDL_RenderClear(renderer);
 
 	//Uppdate all system that need to be rendered
-	registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
-	registry->GetSystem<CollisionSystem>().Update(renderer);
+	registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
 
 	SDL_RenderPresent(renderer);
 }

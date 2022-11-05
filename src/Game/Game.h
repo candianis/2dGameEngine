@@ -3,6 +3,7 @@
 
 #include "../ECS/ECS.h"
 #include "../Asset Store/AssetStore.h"
+#include "../EventBus/EventBus.h"
 #include <SDL.h>
 
 const int FPS = 60;
@@ -15,10 +16,11 @@ private:
 	int millisecsPreviousFrame = 0;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
+	SDL_Rect camera;
 
 	std::unique_ptr<Registry> registry;
 	std::unique_ptr<AssetStore> assetStore;
-	//std::unique_ptr<EventBus> eventBus;
+	std::unique_ptr<EventBus> eventBus;
 
 public:
 	Game();
@@ -32,8 +34,10 @@ public:
 	void Render();
 	void Destroy();
 
-	int windowWidth;
-	int windowHeight;
+	static int windowWidth;
+	static int windowHeight;
+	static int mapWidth;
+	static int mapHeight;
 };
 
 #endif // !GAME_H

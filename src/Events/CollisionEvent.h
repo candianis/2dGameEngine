@@ -2,13 +2,13 @@
 #define COLLISIONEVENT_H
 
 #include "../ECS/ECS.h"
+#include "../EventBus/Event.h"
 
 class CollisionEvent : public Event {
 public:
-	Entity a;
-	Entity b;
-
-	CollisonEvent(Entity a, Entity b) : a(a), b(b) {} 
+    Entity a;
+    Entity b;
+    CollisionEvent(Entity a, Entity b) : a(a), b(b) {}
 };
 
-#endif // !COLLISIONEVENT_H
+#endif
