@@ -19,8 +19,8 @@ public:
 			if (transform.position.x  + (camera.w / 2) < Game::mapWidth) {
 				camera.x = transform.position.x - (Game::windowWidth / 2);
 			}
-			if (transform.position.y + (camera.h) < Game::mapHeight) {
-				camera.y = transform.position.y - (Game::windowHeight);
+			if (transform.position.y + (camera.h / 2) < Game::mapHeight) {
+				camera.y = transform.position.y - (Game::windowHeight / 2);
 			}
 			
 			//Terniary operator for keeping the camera rectangle view inside the screen limits
