@@ -23,8 +23,8 @@ public:
 			});
 
 		for (auto entity : entitiesList) {
-			const auto transform = entity.GetComponent<TransformComponent>();
-			const auto sprite = entity.GetComponent<SpriteComponent>();
+			const auto& transform = entity.GetComponent<TransformComponent>();
+			const auto& sprite = entity.GetComponent<SpriteComponent>();
 
 			//Set source rectangle
 			SDL_Rect srcRect = sprite.srcRect;

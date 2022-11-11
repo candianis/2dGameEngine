@@ -12,7 +12,7 @@ public:
 
 	void Update() {
 		for (auto entity : GetSystemEntities()) {
-			auto projectile = entity.GetComponent<ProjectileComponent>();
+			auto& projectile = entity.GetComponent<ProjectileComponent>();
 
 			if (SDL_GetTicks() - projectile.startTime > projectile.duration) {
 				entity.Kill();

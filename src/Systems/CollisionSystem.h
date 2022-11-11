@@ -23,8 +23,8 @@ public:
 		for (auto i = entities.begin(); i != entities.end(); i++) {
 			Entity a = *i;
 
-			auto aTransform = a.GetComponent<TransformComponent>();
-			auto aCollider = a.GetComponent<BoxColliderComponent>();
+			auto& aTransform = a.GetComponent<TransformComponent>();
+			auto& aCollider = a.GetComponent<BoxColliderComponent>();
 
 			//Loop all the entities that still need to be checked (that are next to i 
 			for (auto j = i + 1; j != entities.end(); j++) {

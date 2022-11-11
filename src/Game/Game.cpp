@@ -21,6 +21,7 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Events/KeyPressedEvent.h"
+#include "../Events/KeyReleasedEvent.h"
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -167,6 +168,7 @@ void Game::LoadLevel(int levelId) {
 	chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80.0), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
 	chopper.AddComponent<CameraFollowComponent>();
 	chopper.AddComponent<HealthComponent>(100.0);
+	chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 100.0), 500, 3000, 10, true);
 
 	Entity radar = registry->CreateEntity();
 	radar.AddComponent<TransformComponent>(glm::vec2(1125.0, 16.0), glm::vec2(1.0, 1.0), 0.0);
@@ -215,10 +217,13 @@ void Game::ProcessInput()
 			if (keyPressed.key.keysym.sym == SDLK_ESCAPE) {
 				isRunning = false;
 			}
-			if (keyPressed.key.keysym.sym == SDLK_d) {
+			if (keyPressed.key.keysym.sym == SDLK_b) {
 				isDebug = true;
 			}
 			break;
+		
+		case SDL_KEYUP:
+			eventBus->EmitEvent<KeyReleasedEvent>(keyPressed.key.keysym.sym);
 		}
 	}
 }
@@ -244,6 +249,7 @@ void Game::Update()
 	//We have to subscribe to events before updating the systems
 	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
 	registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+	registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
 	//Update registry to create/destroy entities
 	registry->Update();

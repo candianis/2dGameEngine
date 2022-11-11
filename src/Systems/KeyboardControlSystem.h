@@ -5,8 +5,10 @@
 #include "../Components/KeyboardControlledComponent.h"
 #include "../Components/RigidbodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/KeyPressedEvent.h"
+#include "../Events/KeyReleasedEvent.h"
 #include <SDL.h>
 
 class KeyboardControlSystem : public System {
@@ -15,43 +17,74 @@ public:
 		RequireComponent<KeyboardControlledComponent>();
 		RequireComponent<SpriteComponent>();
 		RequireComponent<RigidBodyComponent>();
+		RequireComponent<ProjectileEmitterComponent>();
 	}
 
 	void SubscribeToEvents(std::unique_ptr<EventBus>& eventBus) {
 		eventBus->SubscribeToEvent<KeyPressedEvent>(this, &KeyboardControlSystem::OnKeyPressed);
+		eventBus->SubscribeToEvent<KeyReleasedEvent>(this, &KeyboardControlSystem::OnKeyReleased);
 	}
 
 	void OnKeyPressed(KeyPressedEvent& event) {
 		for (auto entity : GetSystemEntities()) {
-			const auto& keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
+			auto& keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
 			auto& sprite = entity.GetComponent<SpriteComponent>();
 			auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
+			auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
 
 			switch (event.symbol) {
-				case SDLK_UP:
-					rigidbody.velocity = keyboardControl.upVelocity;
-					sprite.srcRect.y = sprite.height * 0;
-					break;
-				case SDLK_RIGHT:
-					rigidbody.velocity = keyboardControl.rightVelocity;
-					sprite.srcRect.y = sprite.height * 1;
-					break;
-				case SDLK_DOWN:
-					rigidbody.velocity = keyboardControl.downVelocity;
-					sprite.srcRect.y = sprite.height * 2;
-					break;
-				case SDLK_LEFT:
-					rigidbody.velocity = keyboardControl.leftVelocity;
-					sprite.srcRect.y = sprite.height * 3;
-					break;
+			case SDLK_UP:
+			case SDLK_w:
+				rigidbody.velocity = keyboardControl.upVelocity;
+				sprite.srcRect.y = sprite.height * 0;
+				keyboardControl.direction = direction_axis::UP;
+				break;
+			case SDLK_RIGHT:
+			case SDLK_d:
+				rigidbody.velocity = keyboardControl.rightVelocity;
+				sprite.srcRect.y = sprite.height * 1;
+				keyboardControl.direction = direction_axis::RIGHT;
+				break;
+			case SDLK_DOWN:
+			case SDLK_s:
+				rigidbody.velocity = keyboardControl.downVelocity;
+				sprite.srcRect.y = sprite.height * 2;
+				keyboardControl.direction = direction_axis::DOWN;
+				break;
+			case SDLK_LEFT:
+			case SDLK_a:
+				rigidbody.velocity = keyboardControl.leftVelocity;
+				sprite.srcRect.y = sprite.height * 3;
+				keyboardControl.direction = direction_axis::LEFT;
+				break;
 			}
+		}
+	}
+
+	void OnKeyReleased(KeyReleasedEvent& event) {
+		for (auto entity : GetSystemEntities()) {
+			const auto& keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
+			auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
+			auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
+
+			switch (event.symbol) {
+			case SDLK_UP:
+			case SDLK_RIGHT:
+			case SDLK_DOWN:
+			case SDLK_LEFT:
+				rigidbody.velocity = keyboardControl.nullVelocity;
+				break;
+				
+			case SDLK_SPACE:
+
+				break;
+			}		
 		}
 	}
 
 	void Update(std::unique_ptr<EventBus>& eventBus) {
 
 	}
-
 
 };
 

@@ -14,7 +14,7 @@ public:
 
 	void Update(SDL_Rect& camera) {
 		for (auto entity : GetSystemEntities()) {
-			auto transform = entity.GetComponent<TransformComponent>();
+			auto& transform = entity.GetComponent<TransformComponent>();
 
 			if (transform.position.x  + (camera.w / 2) < Game::mapWidth) {
 				camera.x = transform.position.x - (Game::windowWidth / 2);
