@@ -41,31 +41,27 @@ public:
 					projectilePosition.x += (transform.scale.x * sprite.width / 2);
 					projectilePosition.y += (transform.scale.y * sprite.height / 2);
 				}
-				double rawProjectileVelocity;
-				if (projectileEmitter.projectileVelocity.x == 0.0)
-					rawProjectileVelocity = projectileEmitter.projectileVelocity.y;
-				else
-					rawProjectileVelocity = projectileEmitter.projectileVelocity.x;
 
 				glm::vec2 projectileVelocity;
 				switch (keyboardControl.direction) {
 				case direction_axis::UP:
-					projectileVelocity = glm::vec2(0.0, -rawProjectileVelocity);
+					projectileVelocity = glm::vec2(0.0, -projectileEmitter.projectileVelocity.y);
 					break;
 
 				case direction_axis::RIGHT:
-					projectileVelocity = glm::vec2(rawProjectileVelocity, 0.0);
+					projectileVelocity = glm::vec2(projectileEmitter.projectileVelocity.x, 0.0);
 					break;
 
 				case direction_axis::DOWN:
-					projectileVelocity = glm::vec2(0.0, rawProjectileVelocity);
+					projectileVelocity = glm::vec2(0.0, projectileEmitter.projectileVelocity.y);
 					break;
 
 				case direction_axis::LEFT:
-					projectileVelocity = glm::vec2(-rawProjectileVelocity, 0.0);
+					projectileVelocity = glm::vec2(-projectileEmitter.projectileVelocity.x, 0.0);
 				}
 
 				Entity projectile = entity.registry->CreateEntity();
+				projectile.Group("projectiles");
 				projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0);
 				projectile.AddComponent<RigidBodyComponent>(projectileVelocity);
 				projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, LAYER_BULLETS);
@@ -74,10 +70,6 @@ public:
 
 				projectileEmitter.lastEmissionTime = SDL_GetTicks();
 			}
-				
-
-			
-			
 		}
 	}
 
@@ -86,7 +78,7 @@ public:
 			const auto& transform = entity.GetComponent<TransformComponent>();
 			auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
 
-			if (entity.HasComponent<KeyboardControlledComponent>()) continue;
+			if (entity.HasComponent<KeyboardControlledComponent>() || projectileEmitter.repeatFrequency == 0) continue;
 
 			 if (SDL_GetTicks() - projectileEmitter.lastEmissionTime > projectileEmitter.repeatFrequency) {
 				glm::vec2 projectilePosition = transform.position;
@@ -97,6 +89,7 @@ public:
 				}
 
 				Entity projectile = registry->CreateEntity();
+				projectile.Group("projectiles");
 				projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0);
 				projectile.AddComponent<RigidBodyComponent>(projectileEmitter.projectileVelocity);
 				projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, LAYER_BULLETS);

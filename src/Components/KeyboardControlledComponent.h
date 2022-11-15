@@ -24,7 +24,7 @@ struct KeyboardControlledComponent {
 		this->downVelocity = downVelocity;
 		this->leftVelocity = leftVelocity;
 		this->nullVelocity = glm::vec2(0);
-		this->direction = RIGHT;
+		this->direction = UP;
 	}
 };
 

@@ -69,9 +69,13 @@ public:
 
 			switch (event.symbol) {
 			case SDLK_UP:
+			case SDLK_w:
 			case SDLK_RIGHT:
+			case SDLK_d:
 			case SDLK_DOWN:
+			case SDLK_s:
 			case SDLK_LEFT:
+			case SDLK_a:
 				rigidbody.velocity = keyboardControl.nullVelocity;
 				break;
 				
