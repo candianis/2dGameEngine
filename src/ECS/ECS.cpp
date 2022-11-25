@@ -189,7 +189,15 @@ void Registry::Update()
 	for (auto entity : entitiesToBeKilled) {
 		RemoveEntityFromSystems(entity);
 
+		//Set all signatures of that entities component list back to false
 		entityComponentSignatures[entity.GetId()].reset();
+
+		//Remove the entity from all the component pools
+		for (auto pool : componentPools) {
+			if (pool) {
+				pool->RemoveEntityFromPool(entity.GetId());
+			}
+		}
 
 		//Make the entity id available for other entities
 		freeIds.push_back(entity.GetId());
