@@ -11,6 +11,7 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/TextLabelComponent.h"
+#include "../Components/TextFollowerComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
@@ -22,6 +23,8 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderTextFollowerSystem.h"
+#include "../Systems/RenderHealthSystem.h"
 #include "../Events/KeyPressedEvent.h"
 #include "../Events/KeyReleasedEvent.h"
 #include <SDL_image.h>
@@ -124,6 +127,8 @@ void Game::LoadLevel(int levelId) {
 	registry->AddSystem<ProjectileEmitSystem>();
 	registry->AddSystem<ProjectileLifecycleSystem>();
 	registry->AddSystem<RenderTextSystem>();
+	registry->AddSystem<RenderTextFollowerSystem>();
+	registry->AddSystem<RenderHealthSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -168,6 +173,9 @@ void Game::LoadLevel(int levelId) {
 	mapWidth = mapNumCols * tileSize * tileScale;
 	mapHeight = mapNumRows * tileSize * tileScale;
 
+	//Colors
+	SDL_Color green = { 0, 255, 0 };
+
 	//Deal with Entities
 	Entity chopper = registry->CreateEntity();
 	chopper.Tag("player");
@@ -180,6 +188,7 @@ void Game::LoadLevel(int levelId) {
 	chopper.AddComponent<CameraFollowComponent>();
 	chopper.AddComponent<HealthComponent>(100.0);
 	chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 1500, 3000, 10, true);
+	chopper.AddComponent<TextFollowerComponent>(glm::vec2(30.0, -15.0), "100%", "charriot-font", green);
 
 	Entity radar = registry->CreateEntity();
 	radar.AddComponent<TransformComponent>(glm::vec2(1125.0, 16.0), glm::vec2(1.0, 1.0), 0.0);
@@ -194,6 +203,7 @@ void Game::LoadLevel(int levelId) {
 	tank.AddComponent<BoxColliderComponent>(32, 32);
 	tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 5000, 3000, 10, false);
 	tank.AddComponent<HealthComponent>(100.0);
+	tank.AddComponent<TextFollowerComponent>(glm::vec2(30.0, -15.0), "100%", "charriot-font", green);
 
 	Entity truck = registry->CreateEntity();
 	truck.Group("enemies");
@@ -203,9 +213,9 @@ void Game::LoadLevel(int levelId) {
 	truck.AddComponent<BoxColliderComponent>(32, 32);
 	truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 10, false);
 	truck.AddComponent<HealthComponent>(100.0);
+	truck.AddComponent<TextFollowerComponent>(glm::vec2(30.0, -15.0), "100%", "charriot-font", green);
 
 	Entity label = registry->CreateEntity();
-	SDL_Color green = { 0, 255, 0 };
 	label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 10), "Chopper 1.0", "charriot-font", green, true);
 }
 
@@ -284,6 +294,8 @@ void Game::Render()
 	//Uppdate all system that need to be rendered
 	registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
 	registry->GetSystem<RenderTextSystem>().Update(renderer ,assetStore, camera);
+	registry->GetSystem<RenderTextFollowerSystem>().Update(renderer, assetStore, camera);
+	registry->GetSystem<RenderHealthSystem>().Update(renderer, camera);
 	if (isDebug)
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
 

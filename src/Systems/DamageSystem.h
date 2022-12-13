@@ -5,6 +5,7 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/ProjectileComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/TextFollowerComponent.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/CollisionEvent.h"
 
@@ -43,7 +44,10 @@ public:
     void OnProjectileHitsEntity(Entity projectile, Entity entity) {
         const auto& projectileComponent = projectile.GetComponent<ProjectileComponent>();
         auto& health = entity.GetComponent<HealthComponent>();
+        auto& textFollower = entity.GetComponent<TextFollowerComponent>();
+
         health.healthPercentage -= projectileComponent.hitPercentDamage;
+        textFollower.text = std::to_string(health.healthPercentage) + "%";
 
         if (health.healthPercentage <= 0) {
             entity.Kill();
@@ -59,6 +63,11 @@ public:
             health.healthPercentage -= projectileComponent.hitPercentDamage;
             Logger::Err("The health of " + std::to_string(player.GetId()) + "is now: " + std::to_string(health.healthPercentage));
 
+            if (player.HasComponent<TextFollowerComponent>()) {
+                auto& textFollower = player.GetComponent<TextFollowerComponent>();
+                textFollower.text = std::to_string(health.healthPercentage) + "%";
+            }
+
             if (health.healthPercentage <= 0) {
                 player.Kill();
             }
@@ -73,6 +82,11 @@ public:
             auto& health = enemy.GetComponent<HealthComponent>();
             health.healthPercentage -= projectileComponent.hitPercentDamage;
             Logger::Err("The health of " + std::to_string(enemy.GetId()) + "is now: " + std::to_string(health.healthPercentage));
+
+            if (enemy.HasComponent<TextFollowerComponent>()) {
+                auto& textFollower = enemy.GetComponent<TextFollowerComponent>();
+                textFollower.text = std::to_string(health.healthPercentage) + "%";
+            }
 
             if (health.healthPercentage <= 0) {
                 enemy.Kill();

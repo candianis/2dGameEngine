@@ -4,6 +4,7 @@
 #include "../ECS/ECS.h"
 #include "../Asset Store/AssetStore.h"
 #include "../Components/TextLabelComponent.h"
+#include "../Components/TransformComponent.h"
 #include <SDL.h>
 
 class RenderTextSystem: public System {
@@ -28,18 +29,17 @@ public:
 			int labelHeight = 0;
 
 			SDL_QueryTexture(texture, NULL, NULL, &labelWidth, &labelHeight);
-
+			
 			SDL_Rect dstRect = {
-				static_cast<int>(textLabel.position.x) - (textLabel.isFixed ? 0 : camera.x),
-				static_cast<int>(textLabel.position.y) - (textLabel.isFixed ? 0 : camera.y),
-				labelWidth,
-				labelHeight
+			static_cast<int>(textLabel.position.x) - (textLabel.isFixed ? 0 : camera.x),
+			static_cast<int>(textLabel.position.y) - (textLabel.isFixed ? 0 : camera.y),
+			labelWidth,
+			labelHeight
 			};
 
 			SDL_RenderCopy(renderer, texture, NULL, &dstRect);
 		}
 	}
-
 };
 
 
