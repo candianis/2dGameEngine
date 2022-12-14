@@ -149,7 +149,6 @@
     <ClInclude Include="src\Components\ProjectileEmitterComponent.h" />
     <ClInclude Include="src\Components\RigidbodyComponent.h" />
     <ClInclude Include="src\Components\SpriteComponent.h" />
-    <ClInclude Include="src\Components\TextFollowerComponent.h" />
     <ClInclude Include="src\Components\TextLabelComponent.h" />
     <ClInclude Include="src\Components\TransformComponent.h" />
     <ClInclude Include="src\ECS\ECS.h" />
@@ -423,9 +422,8 @@
     <ClInclude Include="src\Systems\ProjectileEmitSystem.h" />
     <ClInclude Include="src\Systems\ProjectileLifecycleSystem.h" />
     <ClInclude Include="src\Systems\RenderColliderSystem.h" />
-    <ClInclude Include="src\Systems\RenderHealthSystem.h" />
+    <ClInclude Include="src\Systems\RenderHealthBarSystem.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
-    <ClInclude Include="src\Systems\RenderTextFollowerSystem.h" />
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
   </ItemGroup>
   <ItemGroup>

@@ -31,13 +31,14 @@ public:
 			SDL_QueryTexture(texture, NULL, NULL, &labelWidth, &labelHeight);
 			
 			SDL_Rect dstRect = {
-			static_cast<int>(textLabel.position.x) - (textLabel.isFixed ? 0 : camera.x),
-			static_cast<int>(textLabel.position.y) - (textLabel.isFixed ? 0 : camera.y),
-			labelWidth,
-			labelHeight
+				static_cast<int>(textLabel.position.x) - (textLabel.isFixed ? 0 : camera.x),
+				static_cast<int>(textLabel.position.y) - (textLabel.isFixed ? 0 : camera.y),
+				labelWidth,
+				labelHeight
 			};
 
 			SDL_RenderCopy(renderer, texture, NULL, &dstRect);
+			SDL_DestroyTexture(texture);
 		}
 	}
 };
