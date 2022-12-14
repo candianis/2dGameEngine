@@ -873,6 +873,9 @@
     <ClInclude Include="src\Systems\RenderHealthBarSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="libs\imgui\imgui_impl_sdl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\detail\func_common.inl">
@@ -1304,6 +1307,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Asset Store\AssetStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_impl_sdl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

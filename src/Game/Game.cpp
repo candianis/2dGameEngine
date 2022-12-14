@@ -27,6 +27,8 @@
 #include "../Events/KeyReleasedEvent.h"
 #include <SDL_image.h>
 #include <glm/glm.hpp>
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -90,6 +92,10 @@ void Game::Initialize()
 		Logger::Log("Error creating SDL renderer.");
 		return;
 	}
+
+	//Initilize the Imgui context
+	ImGui::CreateContext();
+	ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
 
 	//Initialize the camera view with the entire screen area
 	camera.x = 0;
@@ -290,14 +296,22 @@ void Game::Render()
 	registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
 	registry->GetSystem<RenderTextSystem>().Update(renderer ,assetStore, camera);
 	registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
-	if (isDebug)
+	if (isDebug) {
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+
+		ImGui::NewFrame();
+		ImGui::ShowDemoWindow();
+		ImGui::Render();
+		ImGuiSDL::Render(ImGui::GetDrawData());
+	}
 
 	SDL_RenderPresent(renderer);
 }
 
 void Game::Destroy()
 {
+	ImGuiSDL::Deinitialize();
+	ImGui::DestroyContext();
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
