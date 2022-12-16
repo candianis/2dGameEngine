@@ -29,6 +29,8 @@
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_sdl.h>
+#include <imgui/imgui_impl_sdlrenderer.h>
+#include <imgui/imgui_impl_sdl.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -95,7 +97,9 @@ void Game::Initialize()
 
 	//Initilize the Imgui context
 	ImGui::CreateContext();
-	ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
+	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+	ImGui_ImplSDLRenderer_Init(renderer);
+	//ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
 
 	//Initialize the camera view with the entire screen area
 	camera.x = 0;
@@ -226,26 +230,37 @@ void Game::Setup() {
 
 void Game::ProcessInput()
 {
-	SDL_Event keyPressed;
-	while (SDL_PollEvent(&keyPressed)) {
+	SDL_Event sdlEvent;
+	while (SDL_PollEvent(&sdlEvent)) {
+		//ImGui SDL input
+		ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+		ImGuiIO& io = ImGui::GetIO();
 
-		switch (keyPressed.type) {
+		int mouseX, mouseY;
+		const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+		io.MousePos = ImVec2(mouseX, mouseY);
+		io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+		io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+
+
+		switch (sdlEvent.type) {
 		case SDL_QUIT:
 			isRunning = false;
 			break;
 
 		case SDL_KEYDOWN:
-			eventBus->EmitEvent<KeyPressedEvent>(keyPressed.key.keysym.sym);
-			if (keyPressed.key.keysym.sym == SDLK_ESCAPE) {
+			eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
+			if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
 				isRunning = false;
 			}
-			if (keyPressed.key.keysym.sym == SDLK_b) {
+			if (sdlEvent.key.keysym.sym == SDLK_b) {
 				isDebug = true;
 			}
 			break;
 		
 		case SDL_KEYUP:
-			eventBus->EmitEvent<KeyReleasedEvent>(keyPressed.key.keysym.sym);
+			eventBus->EmitEvent<KeyReleasedEvent>(sdlEvent.key.keysym.sym);
 		}
 	}
 }
@@ -299,10 +314,13 @@ void Game::Render()
 	if (isDebug) {
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
 
+		ImGui_ImplSDLRenderer_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		ImGui::ShowDemoWindow();
 		ImGui::Render();
-		ImGuiSDL::Render(ImGui::GetDrawData());
+		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+		//ImGuiSDL::Render(ImGui::GetDrawData());
 	}
 
 	SDL_RenderPresent(renderer);
@@ -310,7 +328,9 @@ void Game::Render()
 
 void Game::Destroy()
 {
-	ImGuiSDL::Deinitialize();
+	ImGui_ImplSDLRenderer_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	//ImGuiSDL::Deinitialize();
 	ImGui::DestroyContext();
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
