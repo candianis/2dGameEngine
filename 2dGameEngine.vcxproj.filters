@@ -879,6 +879,9 @@
     <ClInclude Include="libs\imgui\imgui_impl_sdlrenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Systems\RenderGuiSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\detail\func_common.inl">

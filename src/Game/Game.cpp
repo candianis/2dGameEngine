@@ -23,6 +23,7 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/RenderHealthBarSystem.h"
+#include "../Systems/RenderGuiSystem.h"
 #include "../Events/KeyPressedEvent.h"
 #include "../Events/KeyReleasedEvent.h"
 #include <SDL_image.h>
@@ -136,6 +137,7 @@ void Game::LoadLevel(int levelId) {
 	registry->AddSystem<ProjectileLifecycleSystem>();
 	registry->AddSystem<RenderTextSystem>();
 	registry->AddSystem<RenderHealthBarSystem>();
+	registry->AddSystem<RenderGuiSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -313,14 +315,7 @@ void Game::Render()
 	registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
 	if (isDebug) {
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
-
-		ImGui_ImplSDLRenderer_NewFrame();
-		ImGui_ImplSDL2_NewFrame();
-		ImGui::NewFrame();
-		ImGui::ShowDemoWindow();
-		ImGui::Render();
-		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-		//ImGuiSDL::Render(ImGui::GetDrawData());
+		registry->GetSystem<RenderGuiSystem>().Update(registry);
 	}
 
 	SDL_RenderPresent(renderer);
