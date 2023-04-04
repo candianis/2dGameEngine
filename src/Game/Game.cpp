@@ -315,7 +315,7 @@ void Game::Render()
 	registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
 	if (isDebug) {
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
-		registry->GetSystem<RenderGuiSystem>().Update(registry);
+		registry->GetSystem<RenderGuiSystem>().Update(registry, camera);
 	}
 
 	SDL_RenderPresent(renderer);
