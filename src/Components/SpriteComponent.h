@@ -22,6 +22,7 @@ struct SpriteComponent {
 	int height;
 	render_layers layer;
 	SDL_Rect srcRect;
+	SDL_RendererFlip flip;
 	bool isFixed;
 
 	SpriteComponent(std::string assetId = "", int width = 0, int height = 0, render_layers layer = LAYER_TILEMAP, bool isFixed = false, int srcRectx = 0, int srcRecty = 0) {
@@ -30,6 +31,7 @@ struct SpriteComponent {
 		this->height = height;
 		this->layer = layer;
 		this->isFixed = isFixed;
+		this->flip = SDL_FLIP_NONE;
 		this->srcRect = { srcRectx, srcRecty, width, height };
 	}
 
