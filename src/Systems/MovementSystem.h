@@ -39,13 +39,16 @@ public:
 
 		auto& rigidbody = enemy.GetComponent<RigidBodyComponent>();
 		auto& sprite = enemy.GetComponent<SpriteComponent>();
+		auto& projectileEmitter = enemy.GetComponent<ProjectileEmitterComponent>();
 
 		if (rigidbody.velocity.x != 0) {
 			rigidbody.velocity.x *= -1;
+			projectileEmitter.projectileVelocity *= -1;
 			sprite.flip = sprite.flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 		}
 		if (rigidbody.velocity.y != 0) {
 			rigidbody.velocity.y *= -1;
+			projectileEmitter.projectileVelocity *= -1;
 			sprite.flip = sprite.flip == SDL_FLIP_NONE ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
 		}
 	}
@@ -58,6 +61,17 @@ public:
 
 			transform.position.x += rigidbody.velocity.x * deltaTime;
 			transform.position.y += rigidbody.velocity.y * deltaTime;
+
+			//Prevent the player from getting outside the map
+			if (entity.HasTag("player")) {
+				const auto& sprite = entity.GetComponent<SpriteComponent>();
+
+				transform.position.x = (transform.position.x + sprite.width) > Game::mapWidth ? Game::mapWidth - sprite.width : transform.position.x;
+				transform.position.y = (transform.position.y + sprite.height) > Game::mapHeight ? Game::mapHeight - sprite.height : transform.position.y;
+
+				transform.position.x = transform.position.x < 0 ? 0 : transform.position.x;
+				transform.position.y = transform.position.y < 0 ? 0 : transform.position.y;
+			}
 			
 			bool isEntityOutsideMap = (
 				transform.position.x < 0 || transform.position.x > Game::mapWidth ||
