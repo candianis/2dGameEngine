@@ -65,17 +65,23 @@ public:
 			//Prevent the player from getting outside the map
 			if (entity.HasTag("player")) {
 				const auto& sprite = entity.GetComponent<SpriteComponent>();
+				//We do not want the player to be exactly at 0,0 so we will be adding a padding
+				float paddingLeft = 15;
+				float paddingRight = 50;
+				float paddingTop = 15;
+				float paddingBottom = 50;
 
-				transform.position.x = (transform.position.x + sprite.width) > Game::mapWidth ? Game::mapWidth - sprite.width : transform.position.x;
-				transform.position.y = (transform.position.y + sprite.height) > Game::mapHeight ? Game::mapHeight - sprite.height : transform.position.y;
-
-				transform.position.x = transform.position.x < 0 ? 0 : transform.position.x;
-				transform.position.y = transform.position.y < 0 ? 0 : transform.position.y;
+				transform.position.x = (transform.position.x + sprite.width) > Game::mapWidth - paddingRight ? Game::mapWidth - paddingRight - sprite.width : transform.position.x;
+				transform.position.y = (transform.position.y + sprite.height) > Game::mapHeight - paddingBottom ? Game::mapHeight - paddingBottom - sprite.width : transform.position.y;
+				
+				transform.position.x = transform.position.x < paddingLeft ? paddingLeft : transform.position.x;
+				transform.position.y = transform.position.y < paddingTop  ? paddingTop : transform.position.y;
 			}
 			
+			int margin = 100;
 			bool isEntityOutsideMap = (
-				transform.position.x < 0 || transform.position.x > Game::mapWidth ||
-				transform.position.y < 0 || transform.position.y > Game::mapHeight
+				transform.position.x < -margin || transform.position.x > Game::mapWidth + margin ||
+				transform.position.y < -margin || transform.position.y > Game::mapHeight + margin
 			);
 
 			if (isEntityOutsideMap && !entity.HasTag("player"))
