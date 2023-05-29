@@ -2,10 +2,18 @@
 #include <sol/sol.hpp>
 #include <iostream>
 
+int nativeCPPCubeFunction(int n) {
+    return n * n * n;
+}
+
 void TestLua() {
     sol::state lua;
 
     lua.open_libraries(sol::lib::base);
+
+    //Cpp function exposition to Lua
+    lua["cube"] = nativeCPPCubeFunction;
+
     lua.script_file("./assets/scripts/myscript.lua");
 
     int test = lua["some_variable"];
@@ -20,14 +28,10 @@ void TestLua() {
 
     //std::cout << "From the config we have the width: " << width << " and the height: " << height << std::endl;
 
-    int factorial = lua["factorial_number"];
-    std::cout << "The factorial number is " << factorial << std::endl;
 
-    sol::optional<double> secondTest = lua["config"]["test_value"];
-    if (secondTest != sol::nullopt)
-        std::cout << secondTest.value() << std::endl;
-    else
-        std::cout << "No such value exists" << std::endl;
+    sol::function functionFactorial = lua["factorial"];
+    int functionResult = functionFactorial(7);
+    std::cout << "The Lua script calculated 5! as " << functionResult << std::endl;
 }
 
 int main(int argc, char* argv[]) {

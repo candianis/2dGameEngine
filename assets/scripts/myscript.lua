@@ -29,17 +29,12 @@ entities = {
     }
 }
 
-value_to_factorial = 7
-
 function factorial(n)
-    local result = n
-
-    for value = n - 1, 1, -1 do
-        result = result * value
+    if n == 1 then 
+        return 1
     end
 
-    return result 
+    return n * factorial(n - 1)
 end
 
-factorial_number = factorial(value_to_factorial);
-print("The factorial number of " ..value_to_factorial .." is " ..factorial_number)
+print("The cube of the number 3 is: " .. cube(3));
