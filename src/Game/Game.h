@@ -5,6 +5,7 @@
 #include "../Asset Store/AssetStore.h"
 #include "../EventBus/EventBus.h"
 #include <SDL.h>
+#include <sol/sol.hpp>
 
 const int FPS = 60;
 const int MILLISECS_PER_FRAME = 1000 / FPS;
@@ -18,6 +19,8 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Rect camera;
+
+	sol::state lua;
 
 	std::unique_ptr<Registry> registry;
 	std::unique_ptr<AssetStore> assetStore;
