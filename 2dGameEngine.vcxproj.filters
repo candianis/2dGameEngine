@@ -882,6 +882,9 @@
     <ClInclude Include="src\Systems\RenderGuiSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Game\LevelLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\detail\func_common.inl">
@@ -1280,6 +1283,7 @@
     <None Include="libs\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="assets\scripts\Level1.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libs\glm\detail\glm.cpp">
@@ -1322,6 +1326,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="libs\imgui\imgui_impl_sdlrenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Game\LevelLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -159,6 +159,7 @@
     <ClInclude Include="src\EventBus\EventBus.h" />
     <ClInclude Include="src\Events\KeyPressedEvent.h" />
     <ClInclude Include="src\Events\KeyReleasedEvent.h" />
+    <ClInclude Include="src\Game\LevelLoader.h" />
     <ClInclude Include="src\Systems\AnimationSystem.h" />
     <ClInclude Include="src\Systems\CameraMovementSystem.h" />
     <ClInclude Include="src\Systems\CollisionSystem.h" />
@@ -430,6 +431,7 @@
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\scripts\Level1.lua" />
     <None Include="libs\glm\detail\func_common.inl" />
     <None Include="libs\glm\detail\func_common_simd.inl" />
     <None Include="libs\glm\detail\func_exponential.inl" />
@@ -576,6 +578,7 @@
     <ClCompile Include="libs\imgui\imgui_draw.cpp" />
     <ClCompile Include="libs\imgui\imgui_sdl.cpp" />
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Game\LevelLoader.cpp" />
     <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>

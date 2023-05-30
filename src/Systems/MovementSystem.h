@@ -7,6 +7,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
 
 class MovementSystem : public System{
 public:
