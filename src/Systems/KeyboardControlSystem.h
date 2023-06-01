@@ -17,7 +17,6 @@ public:
 		RequireComponent<KeyboardControlledComponent>();
 		RequireComponent<SpriteComponent>();
 		RequireComponent<RigidBodyComponent>();
-		RequireComponent<ProjectileEmitterComponent>();
 	}
 
 	void SubscribeToEvents(std::unique_ptr<EventBus>& eventBus) {
@@ -30,7 +29,6 @@ public:
 			auto& keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
 			auto& sprite = entity.GetComponent<SpriteComponent>();
 			auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
-			auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
 
 			switch (event.symbol) {
 			case SDLK_UP:
@@ -65,7 +63,6 @@ public:
 		for (auto entity : GetSystemEntities()) {
 			const auto& keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
 			auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
-			auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
 
 			switch (event.symbol) {
 			case SDLK_UP:

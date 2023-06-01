@@ -1,7 +1,18 @@
+local current_system_hour = os.date("*t").hour
+local map_texture_asset_id
+
+if current_system_hour >= 9 and current_system_hour < 18 then
+    map_texture_asset_id = "tilemap-texture-day"
+
+else
+    map_texture_asset_id = "tilemap-texture-night"
+end
+
 Level = {
     assets = {
         [0] = 
-        {type = "texture",  id = "tilemap-texture",  file = "./assets/tilemaps/jungle.map"},
+        {type = "texture",  id = "tilemap-texture-day",  file = "./assets/tilemaps/jungle.png"},
+        {type = "texture",  id = "tilemap-texture-night",  file = "./assets/tilemaps/jungle-night.png"},
         {type = "texture",  id = "chopper-texture",  file = "./assets/images/chopper-spritesheet.png"},
         {type = "texture",  id = "takeoff-texture",  file = "./assets/images/takeoff-base.png"},
         {type = "texture",  id = "tank-texture",     file = "./assets/images/tank-panther-right.png"},
@@ -17,7 +28,7 @@ Level = {
     -- Map Configuration
     tilemap = {
         map_file = "./assets/tilemaps/jungle.map",
-        texture_asset_id = "tilemap-texture",
+        texture_asset_id = map_texture_asset_id,
         num_rows = 20,
         num_cols = 25,
         tile_size = 32,
@@ -67,12 +78,13 @@ Level = {
                     left_velocity =  {x = -80.0, y =  0.0}
                 },
     
-                projectile_emitter = {
+                proj = {
                     projectile_velocity = {x = 150.0, y = 150.0},
-                    projectile_duration = 1500,
-                    repeat_frequency = 3000,
+                    projectile_duration = 1.5, -- seconds
+                    repeat_frequency = 3, --seconds
                     hit_percent_damage = 10,
-                    friendly = true
+                    friendly = true,
+                    src_rect = {x = 0, y = 0}
                 },
     
                 health = {
@@ -113,10 +125,10 @@ Level = {
                     height = 32
                 },
     
-                projectile_emitter = {
-                    projectile_velocity = {x = 100.0, y = 0.0},
-                    projectile_duration = 5000,
-                    repeat_frequency = 3000,
+                proj = {
+                    projectile_velocity = {x = math.random(10, 100.0), y = 0.0},
+                    projectile_duration = 5,
+                    repeat_frequency = 3,
                     hit_percent_damage = 10,
                     friendly = false
                 },
@@ -154,10 +166,10 @@ Level = {
                     height = 32
                 },
     
-                projectile_emitter = {
+                proj = {
                     projectile_velocity = {x = 100.0, y = 0.0},
-                    projectile_duration = 2000,
-                    repeat_frequency = 5000,
+                    projectile_duration = 2,
+                    repeat_frequency = 5,
                     hit_percent_damage = 10,
                     friendly = false
                 },

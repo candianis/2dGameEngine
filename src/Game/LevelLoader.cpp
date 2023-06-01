@@ -73,11 +73,16 @@ render_layers GetLayerFromString(const std::string layerType) {
 	if (layerType == "PLAYER")
 		return render_layers::LAYER_PLAYER;
 
+	if (layerType == "ENEMIES")
+		return render_layers::LAYER_ENEMIES;
+
 	if (layerType == "OBSTACLES")
 		return render_layers::LAYER_OBSTACLES;
 
 	if (layerType == "GUI")
 		return render_layers::LAYER_GUI;
+
+	return LAYER_NEUTRAL;
 }
 
 void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelNumber)
@@ -123,15 +128,15 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
 		i++;
 	}
 
-	sol::table tilemap = level["tilemap"];
-	std::string mapFilePath = tilemap["map_file"];
-	std::string mapTextureAssetId = tilemap["texture_asset_id"];
+	sol::table map = level["tilemap"];
+	std::string mapFilePath = map["map_file"];
+	std::string mapTextureAssetId = map["texture_asset_id"];
 
 	//Load the tilemap
-	const int tileSize = tilemap["tile_size"];
-	const double tileScale = tilemap["tile_scale"];
-	int mapNumCols = tilemap["num_cols"];
-	int mapNumRows = tilemap["num_rows"];
+	const int tileSize = map["tile_size"];
+	const double tileScale = map["tile_scale"];
+	int mapNumCols = map["num_cols"];
+	int mapNumRows = map["num_rows"];
 
 	std::ifstream mapFile;
 	mapFile.open(mapFilePath);
@@ -154,7 +159,7 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
 				tile.Group("tiles");
 				tile.AddComponent<TransformComponent>(glm::vec2(x * (tileSize * tileScale), y * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
 				tile.AddComponent<SpriteComponent>(mapTextureAssetId, tileSize, tileSize, render_layers::LAYER_TILEMAP, false, srcRectX, srcRectY);
-			}
+			} 
 	}
 	mapFile.close();
 
@@ -195,41 +200,42 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
 			if (transform != sol::nullopt) {
 				newEntity.AddComponent<TransformComponent>(
 					glm::vec2(entity[COMPONENTS][TRANSFORM][POSITION]["x"], entity[COMPONENTS][TRANSFORM][POSITION]["y"]),
-					glm::vec2(entity[COMPONENTS][TRANSFORM][SCALE]["x"], entity[COMPONENTS][TRANSFORM][SCALE]["y"]),
-					entity[COMPONENTS][TRANSFORM][ROTATION]
+					glm::vec2(entity[COMPONENTS][TRANSFORM][SCALE]["x"].get_or(1.0), entity[COMPONENTS][TRANSFORM][SCALE]["y"].get_or(1.0)),
+					entity[COMPONENTS][TRANSFORM][ROTATION].get_or(0.0)
 					);
 			}
 
 			sol::optional<sol::table> rigidbody = entity[COMPONENTS][RIGIDBODY];
 			if (rigidbody != sol::nullopt) {
-				newEntity.AddComponent<RigidBodyComponent>(glm::vec2(entity[COMPONENTS][RIGIDBODY]["x"], (entity[COMPONENTS][RIGIDBODY]["y"])));
+				newEntity.AddComponent<RigidBodyComponent>(glm::vec2(entity[COMPONENTS][RIGIDBODY]["x"].get_or(0.0), (entity[COMPONENTS][RIGIDBODY]["y"].get_or(0.0))));
 			}
 
 			sol::optional<sol::table> sprite = entity[COMPONENTS][SPRITE];
 			if (sprite != sol::nullopt) {
-				bool isFixed = false;
-				sol::optional<bool> checkIfFixed = entity[COMPONENTS][SPRITE]["isFixed"];
-				if (checkIfFixed != sol::nullopt) {
-					isFixed = entity[COMPONENTS][SPRITE]["isFixed"];
-				}
 
 				newEntity.AddComponent<SpriteComponent>(
 					entity[COMPONENTS][SPRITE][TEXTURE_ID],
 					entity[COMPONENTS][SPRITE][WIDTH],
 					entity[COMPONENTS][SPRITE][HEIGHT],
 					GetLayerFromString(entity[COMPONENTS][SPRITE]["layer"]),
-					isFixed
+					entity[COMPONENTS][SPRITE]["isFixed"].get_or(false),
+					entity[COMPONENTS][SPRITE]["src_rect"]["x"].get_or(0.0),
+					entity[COMPONENTS][SPRITE]["src_rect"]["y"].get_or(0.0)
 					);
 			}
 
 			sol::optional<sol::table> animation = entity[COMPONENTS][ANIMATION];
 			if (animation != sol::nullopt) {
-				newEntity.AddComponent<AnimationComponent>(entity[COMPONENTS][ANIMATION]["num_frames"], entity[COMPONENTS][ANIMATION]["speed_rate"]);
+				newEntity.AddComponent<AnimationComponent>(entity[COMPONENTS][ANIMATION]["num_frames"].get_or(1.0), entity[COMPONENTS][ANIMATION]["speed_rate"].get_or(1.0));
 			}
 
 			sol::optional<sol::table> box_collider = entity[COMPONENTS][BOX_COLLIDER];
 			if (box_collider != sol::nullopt) {
-				newEntity.AddComponent<BoxColliderComponent>(entity[COMPONENTS][BOX_COLLIDER][WIDTH], entity[COMPONENTS][BOX_COLLIDER][HEIGHT], glm::vec2(entity[COMPONENTS][BOX_COLLIDER]["x"], entity[COMPONENTS][BOX_COLLIDER]["y"]));
+				newEntity.AddComponent<BoxColliderComponent>(
+					entity[COMPONENTS][BOX_COLLIDER][WIDTH], 
+					entity[COMPONENTS][BOX_COLLIDER][HEIGHT], 
+					glm::vec2(entity[COMPONENTS][BOX_COLLIDER]["x"].get_or(0.0), 
+							  entity[COMPONENTS][BOX_COLLIDER]["y"].get_or(1.0)));
 			}
 
 			sol::optional<sol::table> keyboardControl = entity[COMPONENTS][KEYBOARD_CONTROL];
@@ -246,16 +252,16 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
 			if (projectileEmitter != sol::nullopt) {
 				newEntity.AddComponent<ProjectileEmitterComponent>(
 					glm::vec2(entity[COMPONENTS][PROJECTILE_EMITTER][PROJECTILE_VELOCITY]["x"], entity[COMPONENTS][PROJECTILE_EMITTER][PROJECTILE_VELOCITY]["Y"]),
-					entity[COMPONENTS][PROJECTILE_EMITTER][PROJECTILE_DURATION],
-					entity[COMPONENTS][PROJECTILE_EMITTER][REPEAT_FREQUENCY],
-					entity[COMPONENTS][PROJECTILE_EMITTER][HIT_DAMAGE],
-					entity[COMPONENTS][PROJECTILE_EMITTER][FRIENDLY]
+					static_cast<int>(entity[COMPONENTS][PROJECTILE_EMITTER][PROJECTILE_DURATION].get_or(1)) * 1000,
+					static_cast<int>(entity[COMPONENTS][PROJECTILE_EMITTER][REPEAT_FREQUENCY].get_or(10)) * 1000,
+					static_cast<int>(entity[COMPONENTS][PROJECTILE_EMITTER][HIT_DAMAGE].get_or(10)),
+					entity[COMPONENTS][PROJECTILE_EMITTER][FRIENDLY].get_or(false)
 					);
 			}
 
 			sol::optional<sol::table> health = entity[COMPONENTS][HEALTH];
 			if (health != sol::nullopt) {
-				int healthValue = entity[COMPONENTS][HEALTH][HEALTH_PERCENTAGE];
+				int healthValue = entity[COMPONENTS][HEALTH][HEALTH_PERCENTAGE].get_or(100);
 				newEntity.AddComponent<HealthComponent>(healthValue);
 			}
 
