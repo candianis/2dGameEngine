@@ -283,6 +283,71 @@ Level = {
                     height = 32
                 }
             }
+        },
+
+        {
+            -- SU-27 fighter jet
+            group = "enemies",
+            components = {
+                transform = {
+                    position = { x = 317, y = 985 },
+                    scale = { x = 1.0, y = 1.0 },
+                    rotation = 0.0, -- degrees
+                },
+                rigidbody = {
+                    velocity = { x = 0.0, y = -50.0 }
+                },
+                sprite = {
+                    texture_asset_id = "su27-texture",
+                    width = 32,
+                    height = 32,
+                    z_index = 5
+                },
+                animation = {
+                    num_frames = 2,
+                    speed_rate = 10 -- fps
+                },
+                box_collider = {
+                    width = 32,
+                    height = 32
+                },
+                health = {
+                    health_percentage = 100
+                },
+                proj = {
+                    projectile_velocity = { x = 0, y = -100 },
+                    projectile_duration = 5, -- seconds
+                    repeat_frequency = 1, -- seconds
+                    hit_percentage_damage = 10,
+                    friendly = false
+                },
+                on_update_script = {
+                    [0] =
+                    function(entity, delta_time, ellapsed_time)
+                        print("Executing the SU-27 fighter jet Lua script!")
+
+                        -- this function makes the fighter jet move up and down the map shooting projectiles
+                        local current_position = get_position(entity)
+                        local current_velocity = get_velocity(entity)
+
+                        -- if it reaches the top or the bottom of the map
+                        if current_position_y < 10  or current_position_y > map_height - 32 then
+                            set_velocity(entity, 0, current_velocity * -1); -- flip the entity y-velocity
+                        else
+                            set_velocity(entity, 0, current_velocity_y); -- do not flip y-velocity
+                        end
+
+                        -- set the transform rotation to match going up or down
+                        if (current_velocity_y < 0) then
+                            set_rotation(entity, 0) -- point up
+                            set_projectile_velocity(entity, 0, -200) -- shoot projectiles up
+                        else
+                            set_rotation(entity, 180) -- point down
+                            set_projectile_velocity(entity, 0, 200) -- shoot projectiles down
+                        end
+                    end
+                }
+            }
         }
     }
 }
