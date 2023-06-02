@@ -10,6 +10,7 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/TextLabelComponent.h"
+#include "../Components/ScriptComponent.h"
 #include <fstream>
 #include <string>
 #include <string_view>
@@ -282,6 +283,12 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
 					desiredColor,
 					entity[COMPONENTS][TEXT_LABEL]["isFixed"]
 					);
+			}
+
+			sol::optional <sol::table> script = entity[COMPONENTS]["on_update_script"];
+			if (script != sol::nullopt) {
+				sol::function func = entity[COMPONENTS]["on_update_script"][0];
+				newEntity.AddComponent<ScriptComponent>(func);
 			}
 		}
 	}
