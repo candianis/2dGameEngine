@@ -17,6 +17,7 @@ Level = {
         {type = "texture",  id = "takeoff-texture",  file = "./assets/images/takeoff-base.png"},
         {type = "texture",  id = "tank-texture",     file = "./assets/images/tank-panther-right.png"},
         {type = "texture",  id = "truck-texture",    file = "./assets/images/truck-ford-right.png"},
+        { type = "texture", id = "su27-texture",     file = "./assets/images/su27-spritesheet.png" },
         {type = "texture",  id = "radar-texture",    file = "./assets/images/radar.png"},
         {type = "texture",  id = "bullet-texture",   file = "./assets/images/bullet.png"},
         {type = "texture",  id = "tree-image",       file = "./assets/images/tree.png"},
@@ -145,7 +146,8 @@ Level = {
                         -- -- change the position of the the airplane to follow a sine wave movement
                         local new_x = ellapsed_time * 0.09
                         local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
-                        set_position(entity, new_x, new_y) -- set the new position
+                        local newVec2 = vec2.new(new_x, new_y)
+                        set_position(entity, newVec2) -- set the new position
                     end
                 }
             }
@@ -162,7 +164,7 @@ Level = {
                 },
     
                 rigidbody = {
-                    velocity = {x = 0.0, y = 0.0}
+                    velocity = {x = 30.0, y = 0.0}
                 },
     
                 sprite = {
@@ -176,14 +178,6 @@ Level = {
                     offset = {x = 0, y = 0},
                     width = 32,
                     height = 32
-                },
-    
-                proj = {
-                    projectile_velocity = {x = 100.0, y = 0.0},
-                    projectile_duration = 2,
-                    repeat_frequency = 5,
-                    hit_percent_damage = 10,
-                    friendly = false
                 },
 
                 health = {
@@ -290,18 +284,18 @@ Level = {
             group = "enemies",
             components = {
                 transform = {
-                    position = { x = 317, y = 985 },
+                    position = { x = 350, y = 200 },
                     scale = { x = 1.0, y = 1.0 },
                     rotation = 0.0, -- degrees
                 },
                 rigidbody = {
-                    velocity = { x = 0.0, y = -50.0 }
+                    velocity = { x = 0.0, y = 100.0 }
                 },
                 sprite = {
                     texture_asset_id = "su27-texture",
                     width = 32,
                     height = 32,
-                    z_index = 5
+                    layer = "ENEMIES"
                 },
                 animation = {
                     num_frames = 2,
@@ -314,36 +308,25 @@ Level = {
                 health = {
                     health_percentage = 100
                 },
-                proj = {
-                    projectile_velocity = { x = 0, y = -100 },
-                    projectile_duration = 5, -- seconds
-                    repeat_frequency = 1, -- seconds
-                    hit_percentage_damage = 10,
-                    friendly = false
-                },
+
                 on_update_script = {
                     [0] =
                     function(entity, delta_time, ellapsed_time)
-                        print("Executing the SU-27 fighter jet Lua script!")
-
                         -- this function makes the fighter jet move up and down the map shooting projectiles
                         local current_position = get_position(entity)
                         local current_velocity = get_velocity(entity)
-
-                        -- if it reaches the top or the bottom of the map
-                        if current_position_y < 10  or current_position_y > map_height - 32 then
-                            set_velocity(entity, 0, current_velocity * -1); -- flip the entity y-velocity
+                        --if it reaches the top or the bottom of the map
+                        if current_position.y < 10  or current_position.y > map_height - 32 then
+                            set_velocity_y(entity, current_velocity.y * -1); -- flip the entity y-velocity
                         else
-                            set_velocity(entity, 0, current_velocity_y); -- do not flip y-velocity
+                            set_velocity_y(entity, current_velocity.y); -- do not flip y-velocity
                         end
 
-                        -- set the transform rotation to match going up or down
-                        if (current_velocity_y < 0) then
+                        --set the transform rotation to match going up or down
+                        if (current_velocity.y < 0) then
                             set_rotation(entity, 0) -- point up
-                            set_projectile_velocity(entity, 0, -200) -- shoot projectiles up
                         else
                             set_rotation(entity, 180) -- point down
-                            set_projectile_velocity(entity, 0, 200) -- shoot projectiles down
                         end
                     end
                 }
@@ -351,3 +334,6 @@ Level = {
         }
     }
 }
+
+map_width = Level.tilemap.num_cols * Level.tilemap.tile_size * Level.tilemap.tile_scale
+map_height = Level.tilemap.num_rows * Level.tilemap.tile_size * Level.tilemap.tile_scale

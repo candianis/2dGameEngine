@@ -93,6 +93,26 @@ void SetEntityVelocity(Entity entity, glm::vec2 velocity) {
 	}
 }
 
+void SetEntityVelocityX(Entity entity, float velocityX) {
+	if (entity.HasComponent<RigidBodyComponent>()) {
+		auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
+		rigidbody.velocity.x = velocityX;
+	}
+	else {
+		Logger::Err("The entity witht the id: " + std::to_string(entity.GetId()) + " does not have a rigidbody component");
+	}
+}
+
+void SetEntityVelocityY(Entity entity, float velocityY) {
+	if (entity.HasComponent<RigidBodyComponent>()) {
+		auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
+		rigidbody.velocity.y = velocityY;
+	}
+	else {
+		Logger::Err("The entity witht the id: " + std::to_string(entity.GetId()) + " does not have a rigidbody component");
+	}
+}
+
 void SetEntityAnimationFrame(Entity entity, int animationFrame) {
 	if (entity.HasComponent<AnimationComponent>()) {
 		auto& animation = entity.GetComponent<AnimationComponent>();
@@ -118,19 +138,22 @@ public:
 			"belongs_to_group", &Entity::BelongsToGroup
 			);
 		lua.new_usertype<glm::vec2>(
-			"vec2", sol::constructors<glm::vec2(float, float)>(), 
+			"vec2", sol::constructors<glm::vec2(float, float)>(),
 			"x", &glm::vec2::x,
-			"y", &glm::vec2::y);
+			"y", &glm::vec2::y
+			);
 
-		lua.set_function("get_position", GetEntityPosition);
-		lua.set_function("get_scale",	 GetEntityScale);
-		lua.set_function("get_rotation", GetEntityRotation);
-		lua.set_function("get_velocity", GetEntityVelocity);
-		lua.set_function("set_position", SetEntityPosition);
-		lua.set_function("set_scale",	 SetEntityScale);
-		lua.set_function("set_rotation", SetEntityRotation);
-		lua.set_function("set_velocity", SetEntityVelocity);
-		lua.set_function("set_frame",	 SetEntityAnimationFrame);
+		lua.set_function("get_position",	GetEntityPosition);
+		lua.set_function("get_scale",		GetEntityScale);
+		lua.set_function("get_rotation",	GetEntityRotation);
+		lua.set_function("get_velocity",	GetEntityVelocity);
+		lua.set_function("set_position",	SetEntityPosition);
+		lua.set_function("set_scale",		SetEntityScale);
+		lua.set_function("set_rotation",	SetEntityRotation);
+		lua.set_function("set_velocity",	SetEntityVelocity);
+		lua.set_function("set_velocity_x",	SetEntityVelocityX);
+		lua.set_function("set_velocity_y",	SetEntityVelocityY);
+		lua.set_function("set_frame",		SetEntityAnimationFrame);
 	}
 
 	void Update(double deltaTime, int ellapsedTime) {

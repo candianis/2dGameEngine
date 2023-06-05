@@ -208,7 +208,7 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
 
 			sol::optional<sol::table> rigidbody = entity[COMPONENTS][RIGIDBODY];
 			if (rigidbody != sol::nullopt) {
-				newEntity.AddComponent<RigidBodyComponent>(glm::vec2(entity[COMPONENTS][RIGIDBODY]["x"].get_or(0.0), (entity[COMPONENTS][RIGIDBODY]["y"].get_or(0.0))));
+				newEntity.AddComponent<RigidBodyComponent>(glm::vec2(entity[COMPONENTS][RIGIDBODY][VELOCITY]["x"].get_or(0.0), (entity[COMPONENTS][RIGIDBODY][VELOCITY]["y"].get_or(0.0))));
 			}
 
 			sol::optional<sol::table> sprite = entity[COMPONENTS][SPRITE];
